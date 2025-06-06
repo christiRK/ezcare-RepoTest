@@ -1,0 +1,12 @@
+from fastapi import APIRouter
+from backend.models.trust_badge import TrustBadge
+from supabase import Client
+from main import supabase
+from typing import List
+
+router = APIRouter()
+
+@router.get("/trust-badges", response_model=List[TrustBadge])
+async def get_trust_badges():
+    badges = supabase.table("trust_badges").select("*").execute()
+    return badges.data
