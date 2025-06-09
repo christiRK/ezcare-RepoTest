@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.models.chat import ChatRequest, ChatResponse, PainCategory
+from models.chat import ChatRequest, ChatResponse, PainCategory
 from supabase import Client
 from main import supabase
 from openai import OpenAI

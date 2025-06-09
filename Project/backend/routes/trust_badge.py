@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.models.trust_badge import TrustBadge
+from models.trust_badge import TrustBadge
 from supabase import Client
 from main import supabase
 from typing import List

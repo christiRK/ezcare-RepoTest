@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
-from backend.routes.faq import router as faq_router
-from backend.routes.testimonial import router as testimonial_router
-from backend.routes.trust_badge import router as trust_badge_router
-from backend.routes.chat import router as chat_router
+from routes.faq import router as faq_router
+from routes.testimonial import router as testimonial_router
+from routes.trust_badge import router as trust_badge_router
+from routes.chat import router as chat_router
 import os
 
 app = FastAPI(title="EZCare AI Backend")
@@ -36,3 +36,21 @@ app.include_router(chat_router, prefix="/api")
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy"}
+
+class AuthData(BaseModel):
+    email: str
+    password: str
+
+@app.post("/signup")
+def signup(data: AuthData):
+    response = supabase.auth.sign_up(email=data.email, password=data.password)
+    if "error" in response and response["error"]:
+        raise HTTPException(status_code=400, detail=response["error"]["message"])
+    return {"message": "Compte créé avec succès", "user": response["user"]}
+
+@app.post("/login")
+def login(data: AuthData):
+    response = supabase.auth.sign_in_with_password({"email": data.email, "password": data.password})
+    if "error" in response and response["error"]:
+        raise HTTPException(status_code=400, detail=response["error"]["message"])
+    return {"message": "Connexion réussie", "session": response["session"]}

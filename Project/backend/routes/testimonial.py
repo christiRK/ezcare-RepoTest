@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.models.testimonial import Testimonial
+from models.testimonial import Testimonial
 from supabase import Client
 from main import supabase
 from typing import List

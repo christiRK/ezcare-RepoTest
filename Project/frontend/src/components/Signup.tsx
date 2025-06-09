@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import axios from 'axios';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -46,15 +47,16 @@ const Signup: React.FC = () => {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { first_name: firstName, last_name: lastName } },
-      });
-      if (error) throw error;
-      window.location.href = '/dashboard';
-    } catch (error: any) {
-      setError(error.message || 'Erreur lors de l\'inscription');
+        await axios.post('http://localhost:3000/signup', {
+            email,
+            password,
+            first_name: firstName,
+            last_name: lastName,
+          });
+          window.location.href = '/dashboard';
+          
+    } catch (err: any) {
+        setError(err.response?.data?.detail || 'Erreur lors de l\'inscription');
     }
   };
 

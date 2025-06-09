@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.models.faq import Faq
+from models.faq import Faq
 from supabase import Client
 from main import supabase
 from typing import List

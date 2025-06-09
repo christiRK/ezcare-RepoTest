@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import axios from 'axios';
+
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -29,14 +31,11 @@ const Login: React.FC = () => {
     }
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+        await axios.post('http://localhost:3000/login', { email, password });
       setSuccess('Connexion réussie ! Redirection...');
       setTimeout(() => window.location.href = '/dashboard', 1000);
-    } catch (error: any) {
-      setError(error.message === 'Invalid login credentials'
-        ? 'Email ou mot de passe incorrect'
-        : 'Erreur lors de la connexion');
+    } catch (err: any) {
+        setError(err.response?.data?.detail || 'Erreur lors de la connexion');
     }
   };
 
@@ -126,6 +125,70 @@ const Login: React.FC = () => {
         <p className="text-center mt-4">
           Pas de compte ? <a href="/signup" className="text-blue-500 hover:underline">S'inscrire</a>
         </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
     </div>
   );
