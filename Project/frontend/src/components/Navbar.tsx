@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Stethoscope } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
+import { Link } from 'react-router-dom'; 
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -21,10 +22,6 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ transparent = false }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<any>(null);
 
@@ -58,46 +55,8 @@ const Navbar: React.FC<NavbarProps> = ({ transparent = false }) => {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = isMenuOpen || isLoginModalOpen ? 'hidden' : 'unset';
-  }, [isMenuOpen, isLoginModalOpen]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!email || !password) {
-      setError('Veuillez entrer un email et un mot de passe');
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      setIsLoginModalOpen(false);
-      setEmail('');
-      setPassword('');
-    } catch (error: any) {
-      setError(error.message === 'Invalid login credentials'
-        ? 'Email ou mot de passe incorrect'
-        : 'Erreur lors de la connexion');
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setError('');
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-          queryParams: { access_type: 'offline', prompt: 'consent' },
-        },
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      setError('Erreur lors de la connexion avec Google');
-    }
-  };
+    document.body.style.overflow = isMenuOpen ? 'hidden' : 'unset';
+  }, [isMenuOpen]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -127,7 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({ transparent = false }) => {
               <button onClick={handleLogout} className="text-blue-100 hover:text-white">Déconnexion</button>
             ) : (
               <>
-                <button onClick={() => setIsLoginModalOpen(true)} className="text-blue-100 hover:text-white">Connexion</button>
+                <a href="/login" className="text-blue-100 hover:text-white">Connexion</a>
                 <a href="/signup" className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-400">S'inscrire</a>
               </>
             )}
@@ -157,58 +116,13 @@ const Navbar: React.FC<NavbarProps> = ({ transparent = false }) => {
               <button onClick={handleLogout} className="block text-blue-100 hover:text-white">Déconnexion</button>
             ) : (
               <>
-                <button onClick={() => setIsLoginModalOpen(true)} className="block text-blue-100 hover:text-white">Connexion</button>
-                <a href="/signup" className="block w-full bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-400">S'inscrire</a>
+                <Link to="/login" className="text-blue-100 hover:text-white">Connexion</Link>
+                <Link to="/signup" className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-400">S'inscrire</Link>
               </>
             )}
           </div>
         </div>
       </div>
-      {isLoginModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Connexion</h2>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            <form onSubmit={handleLogin}>
-              <div className="mb-4">
-                <label htmlFor="email" className="block text-gray-700">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="password" className="block text-gray-700">Mot de passe</label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-400 mb-4">
-                Se connecter
-              </button>
-              <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                className="w-full bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center justify-center"
-              >
-                <img src="/google-icon.png" alt="Google" className="w-5 h-5 mr-2" /> Connexion avec Google
-              </button>
-              <button type="button" onClick={() => setIsLoginModalOpen(false)} className="w-full mt-4 text-gray-600 hover:text-gray-800">
-                Annuler
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };
