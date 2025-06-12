@@ -46,23 +46,17 @@ const Signup: React.FC = () => {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            role: role, // ← rôle stocké ici
-          },
-        },
+        options: { data: { first_name: firstName, last_name: lastName, role } },
       });
-
       if (error) throw error;
-
-      setSuccess('Compte créé avec succès ! Vérifiez vos e-mails.');
+      setSuccess('Inscription réussie ! Redirection...');
+      //Renvoyer vers le bon dashboard selon le role
+      setTimeout(() => navigate('/dashboard'), 1000);
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'inscription.');
+      setError(err.message || 'Erreur lors de l\'inscription');
     }
   };
 
