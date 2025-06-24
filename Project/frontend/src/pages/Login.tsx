@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -13,12 +12,17 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session) window.location.href = '/dashboard';
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) navigate('/dashboard');
     });
-  }, []);
+
+    return () => {
+      data?.subscription?.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,16 +30,21 @@ const Login: React.FC = () => {
     setSuccess('');
 
     if (!email || !password) {
-      setError('Veuillez entrer un email et un mot de passe');
+      setError('Please enter an email and password');
       return;
     }
 
     try {
-        await axios.post('http://localhost:3000/login', { email, password });
-      setSuccess('Connexion réussie ! Redirection...');
-      setTimeout(() => window.location.href = '/dashboard', 1000);
-    } catch (err: any) {
-        setError(err.response?.data?.detail || 'Erreur lors de la connexion');
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setSuccess('Login successful! Redirecting...');
+      setTimeout(() => navigate('/dashboard'), 1000);
+    } catch (error: any) {
+      setError(
+        error.message === 'Invalid login credentials'
+          ? 'Incorrect email or password'
+          : 'Error during login'
+      );
     }
   };
 
@@ -48,13 +57,13 @@ const Login: React.FC = () => {
       });
       if (error) throw error;
     } catch (error: any) {
-      setError('Erreur lors de la connexion avec Google');
+      setError('Error during Google login');
     }
   };
 
   const handleForgotPassword = async () => {
     if (!email) {
-      setError('Veuillez entrer votre email');
+      setError('Please enter your email');
       return;
     }
     try {
@@ -62,9 +71,9 @@ const Login: React.FC = () => {
         redirectTo: `${window.location.origin}/forgot-password`,
       });
       if (error) throw error;
-      setSuccess('Instructions envoyées à votre email');
+      setSuccess('Instructions sent to your email');
     } catch (error: any) {
-      setError('Erreur lors de l\'envoi de l\'email');
+      setError('Error sending email');
     }
   };
 
@@ -73,8 +82,8 @@ const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800">EzCare</h1>
-          <h2 className="mt-6 text-xl font-semibold">Bienvenue</h2>
-          <p className="mt-2 text-gray-600">Connectez-vous à votre compte</p>
+          <h2 className="mt-6 text-xl font-semibold">Welcome</h2>
+          <p className="mt-2 text-gray-600">Log in to your account</p>
         </div>
         {error && <p className="text-red-500 text-center">{error}</p>}
         {success && <p className="text-green-500 text-center">{success}</p>}
@@ -91,7 +100,7 @@ const Login: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-gray-700">Mot de passe</label>
+            <label htmlFor="password" className="block text-gray-700">Password</label>
             <input
               id="password"
               type="password"
@@ -103,92 +112,36 @@ const Login: React.FC = () => {
           </div>
           <div className="flex justify-between">
             <label className="flex items-center">
-              <input type="checkbox" className="mr-2" /> Se souvenir de moi
+              <input type="checkbox" className="mr-2" /> Remember me
             </label>
             <button type="button" onClick={handleForgotPassword} className="text-blue-500 hover:underline">
-              Mot de passe oublié ?
+              Forgot password?
             </button>
           </div>
           <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-400">
-            Se connecter
+            Log in
           </button>
         </form>
         <div className="text-center">
-          <p className="text-gray-600">Ou continuez avec</p>
+          <p className="text-gray-600">Or continue with</p>
           <button
             onClick={handleGoogleSignIn}
             className="mt-4 w-full bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center justify-center"
           >
-            <img src="/google-icon.png" alt="Google" className="w-5 h-5 mr-2" /> Connexion avec Google
+            <img src="/google-icon.png" alt="Google" className="w-5 h-5 mr-2" /> Sign in with Google
           </button>
         </div>
         <p className="text-center mt-4">
-          Pas de compte ? <a href="/signup" className="text-blue-500 hover:underline">S'inscrire</a>
+          Don’t have an account? <a href="/signup" className="text-blue-500 hover:underline">Sign up</a>
         </p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        {/* New Back to Home button */}
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-4 left-4 text-blue-500 hover:underline"
+          aria-label="Back to home"
+        >
+          ← Back to home
+        </button>
       </div>
     </div>
   );

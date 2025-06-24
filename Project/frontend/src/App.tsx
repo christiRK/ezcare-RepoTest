@@ -1,43 +1,150 @@
-import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import AiChatPreview from './components/AiChatPreview';
-import TrustSection from './components/TrustSection';
-import SmartDashboardSection from './components/SmartDashboardSection';
-import UserTestimonialsSection from './components/UserTestimonialsSection';
-import ProfessionalSection from './components/ProfessionalSection';
-import FeaturesToolkitSection from './components/FeaturesToolkitSection';
-import PricingSection from './components/PricingSection';
-import FaqSection from './components/FaqSection';
-import CtaSection from './components/CtaSection';
-import DashboardLayout from './components/Layout/DashboardLayout';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import ResetPassword from './components/ResetPassword';
 import Footer from './components/Footer';
-import './styles/animations.css';
+import Main from './pages/Main';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import B2CDashboard from './pages/B2CDashboard';
+import Quiz from './pages/Quiz';
+import { supabase } from './supabaseClient';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import Terms from './components/Terms.jsx';
+import Privacy from './components/Privacy.jsx';
 
 function App() {
-  return (
-    <div className="min-h-screen bg-gray-900">
-      <Navbar transparent={true} />
-      <HeroSection />
-      <AiChatPreview />
-      <TrustSection />
-      <SmartDashboardSection />
-      <UserTestimonialsSection />
-      <ProfessionalSection />
-      <FeaturesToolkitSection />
-      <PricingSection />
-      <FaqSection />
-      <CtaSection />
-      <Footer />
-      <DashboardLayout />;
-      <Login />
-      <Signup />
-      <ResetPassword />
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [quizDone, setQuizDone] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
 
-    </div>
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUserSession = async () => {
+      console.log('Fetching user session...');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (isMounted) {
+        const currentUser = session?.user ?? null;
+        console.log('Session data:', currentUser);
+        setUser(currentUser);
+        setRole(currentUser?.user_metadata?.role || null);
+
+        if (currentUser) {
+          const { data: quizData } = await supabase
+            .from('medical_profiles')
+            .select('last_quiz_completed_at')
+            .eq('user_id', currentUser.id)
+            .single();
+
+          if (quizData?.last_quiz_completed_at) {
+            const lastCompleted = new Date(quizData.last_quiz_completed_at);
+            const now = new Date();
+            const daysSince = (now.getTime() - lastCompleted.getTime()) / (1000 * 3600 * 24);
+            setQuizDone(daysSince <= 14);
+          } else {
+            setQuizDone(false);
+          }
+        } else {
+          setQuizDone(false);
+        }
+        setLoading(false);
+      }
+    };
+
+    fetchUserSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        console.log('Auth state changed:', event, session);
+        if (isMounted) {
+          const currentUser = session?.user ?? null;
+          setUser(currentUser);
+          setRole(currentUser?.user_metadata?.role || null);
+
+          if (currentUser) {
+            const { data: quizData } = await supabase
+              .from('medical_profiles')
+              .select('last_quiz_completed_at')
+              .eq('user_id', currentUser.id)
+              .single();
+
+            if (quizData?.last_quiz_completed_at) {
+              const lastCompleted = new Date(quizData.last_quiz_completed_at);
+              const now = new Date();
+              const daysSince = (now.getTime() - lastCompleted.getTime()) / (1000 * 3600 * 24);
+              setQuizDone(daysSince <= 14);
+            } else {
+              setQuizDone(false);
+            }
+          } else {
+            setQuizDone(false);
+          }
+        }
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  if (loading) {
+    console.log('Loading state is true, rendering "Chargement..."');
+    return <div className="min-h-screen flex items-center justify-center text-white">Chargement...</div>;
+  }
+
+  console.log('Rendering App with user:', user, 'role:', role, 'quizDone:', quizDone);
+
+  return (
+    <Router>
+      <div className="min-h-screen bg-gray-900 flex flex-col">
+        {!['/login', '/signup'].includes(window.location.pathname) && <Navbar transparent={true} />}
+        <div className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Main />} />
+            <Route
+              path="/login"
+              element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+            />
+            <Route
+              path="/signup"
+              element={user ? <Navigate to="/dashboard" replace /> : <Signup />}
+            />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route
+              path="/dashboard"
+              element={
+                !user ? (
+                  <Navigate to="/login" replace />
+                ) : !quizDone && role === 'patient' ? (
+                  <Navigate to="/quiz" replace />
+                ) : role === 'medecin' ? (
+                  <div className="text-white text-center mt-20 text-2xl font-bold">
+                    Bienvenue sur le dashboard médecin (à implémenter)
+                  </div>
+                ) : (
+                  <B2CDashboard />
+                )
+              }
+            />
+            <Route
+              path="/quiz"
+              element={
+                !user ? (
+                  <Navigate to="/login" replace />
+                ) : (
+                  <Quiz onQuizComplete={() => setQuizDone(true)} />
+                )
+              }
+            />
+          </Routes>
+        </div>
+        {!['/login', '/signup'].includes(window.location.pathname) && <Footer />}
+      </div>
+    </Router>
   );
 }
 
