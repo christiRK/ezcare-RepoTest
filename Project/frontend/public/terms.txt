@@ -1,0 +1,70 @@
+📜 Terms of Use for EZCare AI
+Last Updated: September 7, 2024
+1. Introduction
+Welcome to EZCare AI ("EZCare," "we," "us," or "our"). These Terms of Use ("Terms") govern your access and use of all EZCare products, services, and applications, including but not limited to our website, platform, mobile app, and any AI-based tools (the "Services").
+EZCare is operated by Stanislas BENOIT, a French auto-entrepreneur (Entreprise Individuelle – EI), registered in France and operating under French jurisdiction. The platform is protected by a patent filed with the French National Institute of Industrial Property (INPI).
+By accessing or using any part of our Services, you agree to comply with these Terms, our Privacy Policy, and all applicable laws and regulations. If you do not agree, please do not use our Services.
+2. Legal Entity & Jurisdiction
+EZCare AI is owned and operated by Stanislas BENOIT under the French auto-entrepreneur (EI) status. All legal matters and disputes shall be governed by French law. However, we are actively preparing the transition to a US-based Delaware LLC to extend our services under international business frameworks and maximize data protection compliance.
+The current operator is located at:
+BENOIT Stanislas
+EI Auto-Entrepreneur
+Paris, France
+3. Eligibility and Use
+You may only use EZCare AI if:
+•	You are over 18 years old (or the legal age in your jurisdiction).
+•	You are using the platform for lawful purposes.
+•	You agree not to use the AI for emergency or diagnostic purposes.
+For healthcare professionals, use of the AI tools is intended for supportive informational purposes only, not as a replacement for professional clinical judgment.
+4. Description of Services
+EZCare AI provides an AI-powered health assistant and supporting features for both:
+•	B2C Users: Individuals seeking health guidance, tips, or wellness suggestions.
+•	B2B Users: Healthcare professionals, clinics, hospitals, and teams using advanced tools like patient dashboards, medical record summaries, and AI chat integration.
+The platform includes:
+•	AI-powered health chatbot (powered by OpenAI's GPT-4o)
+•	Health & lifestyle quiz + symptom tracking
+•	Personalized supplement or plan suggestions
+•	File upload, analysis, and export features
+•	Doctor dashboard and team collaboration (for B2B only)
+These features are provided for educational and informational purposes only. No diagnosis, prescription, or medical treatment is issued by the platform.
+5. Intellectual Property
+All content, interface, logic flows, and AI-based workflows developed under EZCare AI are the exclusive property of Stanislas BENOIT, protected under French copyright law and governed by the patent filed with INPI (Institut National de la Propriété Industrielle).
+Unauthorized use, copying, reproduction, or reverse-engineering of any portion of the platform, AI prompts, chatbot logic, UI components, or training datasets is strictly prohibited.
+Any misuse will result in legal action under both French and international law.
+6. Data Privacy and Security Compliance
+EZCare is designed to be fully compliant with the General Data Protection Regulation (GDPR), HIPAA (for US users), and SOC 2 principles.
+We use the following infrastructure:
+•	Supabase (PostgreSQL) with end-to-end encrypted storage and row-level security
+•	OpenAI API (GPT-4o) via anonymized prompts and secured middleware
+•	Supabase for secure authentication
+•	Stripe for PCI-compliant payments
+•	GitHub + Docker for CI/CD version control with audit logs
+Users' personal health information (PHI) is never sent directly to OpenAI. All user input is anonymized prior to AI interaction.
+7. Restrictions
+Users must not:
+•	Use the platform for illegal or malicious purposes
+•	Input real patient names or identifiers into the AI chat
+•	Circumvent access controls, licensing restrictions, or attempt to reverse-engineer the system
+We reserve the right to ban, terminate, or pursue legal remedies against any user violating these conditions.
+8. Payments and Refunds
+For paid plans (monthly or annual), payment is processed via Stripe.
+•	All plans are billed in USD.
+•	Refunds are only granted within 7 days of first subscription for new users.
+We do not provide refunds for unused portions of monthly plans.
+9. Limitation of Liability
+EZCare AI and its owner shall not be liable for any indirect, incidental, consequential, or punitive damages resulting from:
+•	Reliance on AI suggestions
+•	Inaccurate, incomplete, or outdated content
+•	Third-party tools or links
+You agree to use the Services at your own risk. Our AI is not a certified medical professional.
+10. Termination
+EZCare reserves the right to terminate your access without notice for any breach of these Terms. Upon termination, your access will be revoked, and all stored data may be deleted in accordance with GDPR/HIPAA.
+11. Updates
+These Terms may be updated at any time. We will notify users through a banner or direct email if material changes are made. Continued use of the Services implies acceptance of the revised Terms.
+12. Contact
+For any questions, please contact:
+EZCare AI
+Operator: BENOIT Stanislas
+Email: ezcareai.contact@gmail.com
+Paris, France
+

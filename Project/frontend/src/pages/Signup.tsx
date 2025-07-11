@@ -26,22 +26,22 @@ const Signup: React.FC = () => {
     setSuccess('');
 
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      setError('Veuillez remplir tous les champs.');
+      setError('Please fill out all fields.');
       return;
     }
 
     if (password.length < 6) {
-      setError('Mot de passe trop court (minimum 6 caractères).');
+      setError('Password too short (minimum 6 characters).');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError('Passwords do not match.');
       return;
     }
 
     if (!termsAccepted) {
-      setError('Veuillez accepter les conditions d\'utilisation.');
+      setError('Please accept the terms of use.');
       return;
     }
 
@@ -52,11 +52,18 @@ const Signup: React.FC = () => {
         options: { data: { first_name: firstName, last_name: lastName, role } },
       });
       if (error) throw error;
-      setSuccess('Inscription réussie ! Redirection...');
-      //Renvoyer vers le bon dashboard selon le role
-      setTimeout(() => navigate('/dashboard'), 1000);
+
+      setSuccess('Sign-up successful! Redirecting...');
+      // Force a session update
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session) {
+        setTimeout(() => navigate('/dashboard'), 1000);
+      } else {
+        console.error('Session not available after sign-up');
+        setTimeout(() => navigate('/login'), 1000); // Fallback
+      }
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'inscription');
+      setError(err.message || 'Error during sign-up');
     }
   };
 
@@ -69,7 +76,7 @@ const Signup: React.FC = () => {
       });
       if (error) throw error;
     } catch (err: any) {
-      setError('Erreur lors de l\'inscription avec Google.');
+      setError('Error during Google sign-up.');
     }
   };
 
@@ -78,8 +85,8 @@ const Signup: React.FC = () => {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow relative">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800">EzCare</h1>
-          <h2 className="mt-6 text-xl font-semibold">Créez votre compte</h2>
-          <p className="mt-2 text-gray-600">Commencez votre parcours santé avec EzCare</p>
+          <h2 className="mt-6 text-xl font-semibold">Create Your Account</h2>
+          <p className="mt-2 text-gray-600">Start your health journey with EzCare</p>
         </div>
 
         {error && <p className="text-red-500 text-center">{error}</p>}
@@ -88,7 +95,7 @@ const Signup: React.FC = () => {
         <form onSubmit={handleSignup} className="mt-8 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-700">Prénom</label>
+              <label className="block text-gray-700">First Name</label>
               <input
                 type="text"
                 value={firstName}
@@ -98,7 +105,7 @@ const Signup: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-gray-700">Nom</label>
+              <label className="block text-gray-700">Last Name</label>
               <input
                 type="text"
                 value={lastName}
@@ -121,7 +128,7 @@ const Signup: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700">Mot de passe</label>
+            <label className="block text-gray-700">Password</label>
             <input
               type="password"
               value={password}
@@ -132,7 +139,7 @@ const Signup: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700">Confirmer le mot de passe</label>
+            <label className="block text-gray-700">Confirm Password</label>
             <input
               type="password"
               value={confirmPassword}
@@ -143,7 +150,7 @@ const Signup: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700">Je suis :</label>
+            <label className="block text-gray-700">I am:</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
@@ -151,48 +158,51 @@ const Signup: React.FC = () => {
               required
             >
               <option value="patient">Patient</option>
-              <option value="medecin">Médecin</option>
+              <option value="medecin">Doctor</option>
             </select>
           </div>
 
           <div>
-            <label className="flex items-center">
+            <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
                 className="mr-2"
               />
-              J'accepte les <a href="/terms" className="text-blue-500 hover:underline">Conditions</a> et la <a href="/privacy" className="text-blue-500 hover:underline">Politique de confidentialité</a>
+              <span className="text-gray-700">I accept the</span>
+              <a href="/terms" className="text-blue-500 hover:underline">Terms</a>
+              <span className="text-gray-700">and</span>
+              <a href="/privacy" className="text-blue-500 hover:underline">Privacy Policy</a>
             </label>
           </div>
 
           <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-400">
-            Créer un compte
+            Create Account
           </button>
         </form>
 
         <div className="text-center">
-          <p className="text-gray-600">Ou continuez avec</p>
+          <p className="text-gray-600">Or continue with</p>
           <button
             onClick={handleGoogleSignUp}
             className="mt-4 w-full bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center justify-center"
           >
             <img src="/google-icon.png" alt="Google" className="w-5 h-5 mr-2" />
-            Inscription avec Google
+            Sign up with Google
           </button>
         </div>
 
         <p className="text-center mt-4">
-          Déjà un compte ? <a href="/login" className="text-blue-500 hover:underline">Se connecter</a>
+          Already have an account? <a href="/login" className="text-blue-500 hover:underline">Log in</a>
         </p>
 
         <button
           onClick={() => navigate('/')}
           className="absolute top-4 left-4 text-blue-500 hover:underline"
-          aria-label="Retour à l'accueil"
+          aria-label="Back to home"
         >
-          ← Retour à l'accueil
+          ← Back to Home
         </button>
       </div>
     </div>
