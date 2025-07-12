@@ -1,14 +1,15 @@
 from fastapi import APIRouter
 from models.chat import ChatRequest, ChatResponse, PainCategory
-from supabase import Client
-from main import supabase
-from openai import OpenAI
+from supabase_client import supabase
+import openai
 import os
 from typing import List
 
 router = APIRouter()
 
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "your-openai-api-key"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
+if openai.api_key is None:
+    raise ValueError("La variable d'environnement OPENAI_API_KEY n'est pas définie.")
 
 PAIN_CATEGORIES = [
     {"name": "Chest Pain", "icon": "Heart", "color": "bg-red-100 text-red-600"},
@@ -44,7 +45,7 @@ async def chat(request: ChatRequest):
     ]
 
     try:
-        gpt_response = openai_client.chat.completions.create(
+        gpt_response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages,
             max_tokens=150
