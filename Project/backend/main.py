@@ -43,6 +43,7 @@ app.add_middleware(
 
 # Initialisation du client Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+logger.debug("Supabase client initialized successfully")
 
 # Inclure les routes
 app.include_router(faq_router, prefix="/api")
@@ -93,5 +94,5 @@ async def login(data: AuthData):
 
 if __name__ == "__main__":
     import uvicorn
-    logger.info("Starting FastAPI server on port 8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    logger.info("Starting FastAPI server on port 8080")
+    uvicorn.run(app, host="0.0.0.0", port=8080)
