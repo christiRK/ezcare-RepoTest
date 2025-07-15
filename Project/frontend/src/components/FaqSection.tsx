@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface FaqItemProps {
@@ -8,17 +8,17 @@ interface FaqItemProps {
 
 const FaqItem: React.FC<FaqItemProps> = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   return (
     <div className="border-b border-gray-200 py-4">
-      <button 
+      <button
         className="flex justify-between items-center w-full text-left focus:outline-none"
         onClick={() => setIsOpen(!isOpen)}
       >
         <h3 className="text-lg font-semibold text-gray-900">{question}</h3>
         {isOpen ? <ChevronUp className="h-5 w-5 text-blue-600" /> : <ChevronDown className="h-5 w-5 text-blue-600" />}
       </button>
-      
+
       {isOpen && (
         <div className="mt-3 text-gray-600 pl-0">
           <p>{answer}</p>
@@ -29,32 +29,30 @@ const FaqItem: React.FC<FaqItemProps> = ({ question, answer }) => {
 };
 
 const FaqSection: React.FC = () => {
-  const faqs = [
-    {
-      question: "How accurate is EZCare AI's symptom checker ?",
-      answer: "EZCare AI is designed to provide information that is accurate and up-to-date based on the latest medical research. Our AI system is trained on millions of medical data points and constantly updated. However, it's important to remember that even the best AI cannot replace a healthcare professional, which is why we clearly indicate when you should seek medical attention."
-    },
-    {
-      question: "Is my health data secure and private ?",
-      answer: "Absolutely. We take your privacy extremely seriously. All your health data is encrypted and secured according to HIPAA standards. We never sell your personal information to third parties, and you have complete control over your data, including the right to delete it at any time."
-    },
-    {
-      question: "Can EZCare AI help with mental health concerns ?",
-      answer: "Yes, EZCare AI can provide preliminary guidance for common mental health concerns such as anxiety and depression. However, for serious mental health issues, we strongly recommend consulting with a qualified mental health professional, and our system will always direct you to appropriate resources."
-    },
-    {
-      question: "How does EZCare AI compare to just searching symptoms online ?",
-      answer: "Unlike random internet searches that can lead to anxiety-inducing results, EZCare AI provides personalized, evidence-based information specific to your situation. Our AI filters out unlikely conditions and provides contextual information rather than showing you worst-case scenarios that aren't relevant to your specific symptoms and health profile."
-    },
-    {
-      question: "Can I use EZCare AI for my children or elderly parents ?",
-      answer: "Yes, you can create family profiles for children and elderly family members that you care for. However, please note that symptom assessment for infants under 1 year old should always be verified with a healthcare provider, and our system will emphasize this guidance."
-    },
-    {
-      question: "Does EZCare AI replace the need to see a doctor ?",
-      answer: "No, EZCare AI is designed to complement, not replace, traditional healthcare. It helps you better understand your symptoms and provides guidance on whether you should seek medical attention, but it cannot diagnose conditions with absolute certainty or prescribe treatments. Always follow up with a healthcare provider for serious or persistent symptoms."
-    }
-  ];
+  const [faqs, setFaqs] = useState<FaqItemProps[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/faqs`);
+        if (!response.ok) {
+          throw new Error(`Erreur serveur: ${response.status}`);
+        }
+        const data = await response.json();
+        setFaqs(data);
+      } catch (err: any) {
+        setError(err.message || "Erreur inconnue");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFaqs();
+  }, []);
 
   return (
     <section id="faq" className="py-24 bg-gray-50">
@@ -67,13 +65,16 @@ const FaqSection: React.FC = () => {
             Get answers to common questions about EZCare AI
           </p>
         </div>
-        
+
+        {loading && <p className="text-center text-gray-500">Chargement...</p>}
+        {error && <p className="text-center text-red-500">{error}</p>}
+
         <div className="space-y-1">
           {faqs.map((faq, index) => (
             <FaqItem key={index} question={faq.question} answer={faq.answer} />
           ))}
         </div>
-        
+
         <div className="mt-12 text-center">
           <p className="text-gray-600 mb-4">Still have questions?</p>
           <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">

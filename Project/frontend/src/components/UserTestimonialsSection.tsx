@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Trophy } from 'lucide-react';
-//port { auth } from '../backend/supabase_client
+import {
+  Brain,
+  Activity,
+  FileText,
+  Star,
+  Trophy,
+} from 'lucide-react';
 
 interface TestimonialCardProps {
   name: string;
@@ -9,18 +14,34 @@ interface TestimonialCardProps {
   quote: string;
   image_url: string;
   feature: string;
-  featureIcon: string;
+  feature_icon: string;
   color: string;
   rating: number;
 }
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ name, title, quote, image_url, feature, featureIcon, color, rating }) => {
-  const icons: { [key: string]: React.ReactNode } = {
-    Brain: <Brain className="w-4 h-4 text-purple-600" />,
-    Activity: <Activity className="w-4 h-4 text-blue-600" />,
-    FileText: <FileText className="w-4 h-4 text-green-600" />,
-  };
+interface TrustBadge {
+  name: string;
+  image_url: string;
+  description: string;
+  rating: number;
+}
 
+const icons: { [key: string]: React.ReactNode } = {
+  Brain: <Brain className="w-4 h-4 text-purple-600" />,
+  Activity: <Activity className="w-4 h-4 text-blue-600" />,
+  FileText: <FileText className="w-4 h-4 text-green-600" />,
+};
+
+const TestimonialCard: React.FC<TestimonialCardProps> = ({
+  name,
+  title,
+  quote,
+  image_url,
+  feature,
+  feature_icon,
+  color,
+  rating,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -43,7 +64,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ name, title, quote, i
       <p className="text-gray-700 italic mb-4">"{quote}"</p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
-          {icons[featureIcon]}
+          {icons[feature_icon]}
           <span className="text-sm text-gray-600">{feature}</span>
         </div>
         <div className="flex">
@@ -58,15 +79,13 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ name, title, quote, i
 
 const UserTestimonialsSection: React.FC = () => {
   const [testimonials, setTestimonials] = useState<TestimonialCardProps[]>([]);
-  const [badges, setBadges] = useState<any[]>([]);
+  const [badges, setBadges] = useState<TrustBadge[]>([]);
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const response = await fetch('http://localhost:8001/api/testimonials', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(`${API_URL}/api/testimonials`);
         const data = await response.json();
         setTestimonials(data);
       } catch (error) {
@@ -76,10 +95,7 @@ const UserTestimonialsSection: React.FC = () => {
 
     const fetchBadges = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const response = await fetch('http://localhost:8001/api/trust-badges', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(`${API_URL}/api/trust-badges`);
         const data = await response.json();
         setBadges(data);
       } catch (error) {
