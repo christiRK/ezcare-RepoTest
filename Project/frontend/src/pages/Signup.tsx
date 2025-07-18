@@ -1,47 +1,49 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
+type role = "patient" | "medecin";
+
 const Signup: React.FC = () => {
   const navigate = useNavigate();
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [role, setRole] = useState('patient');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [role, setRole] = useState<role>("patient");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      setError('Please fill out all fields.');
+      setError("Please fill out all fields.");
       return;
     }
 
     if (password.length < 6) {
-      setError('Password too short (minimum 6 characters).');
+      setError("Password too short (minimum 6 characters).");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
 
     if (!termsAccepted) {
-      setError('Please accept the terms of use.');
+      setError("Please accept the terms of use.");
       return;
     }
 
@@ -49,34 +51,55 @@ const Signup: React.FC = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { first_name: firstName, last_name: lastName, role } },
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            role,
+          },
+        },
       });
       if (error) throw error;
 
-      setSuccess('Sign-up successful! Redirecting...');
+      const { error: errorOne } = await supabase
+        .from("users")
+        .upsert({ email: email, role: role })
+        .select();
+
+      if (errorOne) throw errorOne;
+
+      setSuccess("Sign-up successful! Redirecting...");
       // Force a session update
       const { data: sessionData } = await supabase.auth.getSession();
       if (sessionData.session) {
-        setTimeout(() => navigate('/dashboard'), 1000);
+        setTimeout(() => navigate("/dashboard"), 1000);
       } else {
-        console.error('Session not available after sign-up');
-        setTimeout(() => navigate('/login'), 1000); // Fallback
+        console.error("Session not available after sign-up");
+        setTimeout(() => navigate("/login"), 1000); // Fallback
       }
     } catch (err: any) {
-      setError(err.message || 'Error during sign-up');
+      setError(err.message || "Error during sign-up");
+    } finally {
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setTermsAccepted(false);
+      setRole("patient");
     }
   };
 
   const handleGoogleSignUp = async () => {
     try {
-      setError('');
+      setError("");
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: { redirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) throw error;
     } catch (err: any) {
-      setError('Error during Google sign-up.');
+      setError("Error during Google sign-up.");
     }
   };
 
@@ -86,7 +109,9 @@ const Signup: React.FC = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800">EzCare</h1>
           <h2 className="mt-6 text-xl font-semibold">Create Your Account</h2>
-          <p className="mt-2 text-gray-600">Start your health journey with EzCare</p>
+          <p className="mt-2 text-gray-600">
+            Start your health journey with EzCare
+          </p>
         </div>
 
         {error && <p className="text-red-500 text-center">{error}</p>}
@@ -95,47 +120,55 @@ const Signup: React.FC = () => {
         <form onSubmit={handleSignup} className="mt-8 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-700">First Name</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg"
-                required
-              />
+              <label className="block text-gray-700">
+                First Name
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </label>
             </div>
             <div>
-              <label className="block text-gray-700">Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg"
-                required
-              />
+              <label className="block text-gray-700">
+                Last Name
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </label>
             </div>
           </div>
 
           <div>
-            <label className="block text-gray-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg"
-              required
-            />
+            <label className="block text-gray-700">
+              Email
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </label>
           </div>
 
           <div>
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg"
-              required
-            />
+            <label className="block text-gray-700">
+              Password
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </label>
           </div>
 
           <div>
@@ -171,13 +204,20 @@ const Signup: React.FC = () => {
                 className="mr-2"
               />
               <span className="text-gray-700">I accept the</span>
-              <a href="/terms" className="text-blue-500 hover:underline">Terms</a>
+              <a href="/terms" className="text-blue-500 hover:underline">
+                Terms
+              </a>
               <span className="text-gray-700">and</span>
-              <a href="/privacy" className="text-blue-500 hover:underline">Privacy Policy</a>
+              <a href="/privacy" className="text-blue-500 hover:underline">
+                Privacy Policy
+              </a>
             </label>
           </div>
 
-          <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-400">
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-400"
+          >
             Create Account
           </button>
         </form>
@@ -194,11 +234,14 @@ const Signup: React.FC = () => {
         </div>
 
         <p className="text-center mt-4">
-          Already have an account? <a href="/login" className="text-blue-500 hover:underline">Log in</a>
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-500 hover:underline">
+            Log in
+          </a>
         </p>
 
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="absolute top-4 left-4 text-blue-500 hover:underline"
           aria-label="Back to home"
         >
